@@ -1,32 +1,25 @@
 const socket = io();
 
 let currentUser = null;
-let currentRoom = "عام";
-
-const loginScreen = document.getElementById("login-screen");
-const chatScreen = document.getElementById("chat-screen");
-const errorText = document.getElementById("error");
 
 document.getElementById("loginBtn").onclick = () => {
   const username = document.getElementById("username").value.trim();
   const code = document.getElementById("code").value.trim();
-  const avatar = document.getElementById("avatar").value.trim();
 
-  socket.emit("login", { username, code, avatar });
+  socket.emit("login", { username, code });
 };
 
 socket.on("login error", (msg) => {
-  errorText.textContent = msg;
+  document.getElementById("error").textContent = msg;
 });
 
 socket.on("login success", (data) => {
   currentUser = data.user;
 
-  loginScreen.style.display = "none";
-  chatScreen.style.display = "flex";
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("chat-screen").style.display = "flex";
 
   loadRooms(data.rooms);
-  document.getElementById("roomTitle").textContent = "عام";
 });
 
 function loadRooms(rooms) {
@@ -39,13 +32,11 @@ function loadRooms(rooms) {
     li.style.cursor = "pointer";
 
     li.onclick = () => {
-      currentRoom = room;
       document.getElementById("messages").innerHTML = "";
       document.getElementById("roomTitle").textContent = room;
       socket.emit("change room", room);
     };
 
-    // زر حذف للأدمن فقط
     if (currentUser.role === "admin" && room !== "عام") {
       const del = document.createElement("button");
       del.textContent = "🗑";
@@ -63,9 +54,7 @@ document.getElementById("createRoomBtn").onclick = () => {
   socket.emit("create room", room);
 };
 
-socket.on("room list", (rooms) => {
-  loadRooms(rooms);
-});
+socket.on("room list", loadRooms);
 
 socket.on("online users", (users) => {
   const list = document.getElementById("onlineUsers");
@@ -73,26 +62,13 @@ socket.on("online users", (users) => {
 
   users.forEach(u => {
     const li = document.createElement("li");
-    li.innerHTML = `
-      <span class="online-dot">●</span>
-      <img src="${u.avatar}" width="25" style="border-radius:50%">
-      ${u.username}
-    `;
-
-    li.style.cursor = "pointer";
-
-    // رسالة خاصة
-    li.onclick = () => {
-      const msg = prompt("رسالة خاصة:");
-      if (!msg) return;
-      socket.emit("private message", { to: u.id, msg });
-    };
-
+    li.innerHTML = `<span class="online-dot">●</span>${u.username}`;
     list.appendChild(li);
   });
 });
 
 document.getElementById("send").onclick = sendMessage;
+
 document.getElementById("msg").addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
@@ -111,17 +87,10 @@ socket.on("chat message", (data) => {
   li.classList.add("message");
 
   li.innerHTML = `
-    <img src="${data.avatar}">
-    <div>
-      <strong>${data.username}</strong>
-      <div>${data.msg}</div>
-      <small>${data.time}</small>
-    </div>
+    <strong>${data.username}</strong><br>
+    ${data.msg}<br>
+    <small>${data.time}</small>
   `;
 
   document.getElementById("messages").appendChild(li);
-});
-
-socket.on("private message", (data) => {
-  alert("📩 رسالة خاصة من " + data.from + ":\n" + data.msg);
 });
