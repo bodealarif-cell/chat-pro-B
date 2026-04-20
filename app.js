@@ -11,31 +11,86 @@ const io = new Server(server, {
 
 app.use(express.static("public"));
 
-const messages = [];
+const PORT = process.env.PORT || 3000;
 
+// ===== بيانات في الذاكرة =====
+const ACCESS_CODE = "12345"; // غيره براحتك
+
+let users = {}; 
+let rooms = {
+  "عام": [],
+  "برمجة": [],
+  "ألعاب": []
+};
+
+// ===== الاتصال =====
 io.on("connection", (socket) => {
 
-  // إرسال الرسائل القديمة
-  socket.emit("load messages", messages);
+  // تسجيل الدخول
+  socket.on("login", ({ username, code }) => {
 
-  socket.on("chat message", (data) => {
+    if (code !== ACCESS_CODE) {
+      return socket.emit("login error", "كود الدخول غير صحيح");
+    }
 
-    if (!data.msg || data.msg.trim() === "" || data.msg.length > 300) return;
+    if (!username || username.trim() === "") {
+      return socket.emit("login error", "اكتب اسم صحيح");
+    }
+
+    users[socket.id] = {
+      username,
+      room: "عام"
+    };
+
+    socket.join("عام");
+
+    socket.emit("login success", {
+      username,
+      room: "عام",
+      rooms: Object.keys(rooms)
+    });
+
+    io.emit("online users", Object.values(users));
+  });
+
+  // تغيير روم
+  socket.on("change room", (room) => {
+
+    if (!rooms[room]) return;
+
+    const oldRoom = users[socket.id].room;
+    socket.leave(oldRoom);
+
+    users[socket.id].room = room;
+    socket.join(room);
+
+    socket.emit("room changed", room);
+  });
+
+  // إرسال رسالة
+  socket.on("chat message", (msg) => {
+
+    const user = users[socket.id];
+    if (!user) return;
 
     const messageData = {
-      name: data.name || "مجهول",
-      msg: data.msg.trim(),
+      username: user.username,
+      msg: msg.trim(),
       time: new Date().toLocaleTimeString()
     };
 
-    messages.push(messageData);
+    rooms[user.room].push(messageData);
 
-    io.emit("chat message", messageData);
+    io.to(user.room).emit("chat message", messageData);
+  });
+
+  // عند الخروج
+  socket.on("disconnect", () => {
+    delete users[socket.id];
+    io.emit("online users", Object.values(users));
   });
 
 });
-
-const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log("Server running on port " + PORT);
