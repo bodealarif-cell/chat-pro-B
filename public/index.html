@@ -2,20 +2,34 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Chat Pro</title>
+  <title>Discord Style Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="chat-container">
-  <h2>🔥 Chat Pro</h2>
+<div id="login-screen">
+  <h2>🔐 تسجيل دخول</h2>
+  <input id="username" placeholder="اسمك" />
+  <input id="code" placeholder="كود الدخول" />
+  <button id="loginBtn">دخول</button>
+  <p id="error"></p>
+</div>
 
-  <ul id="messages"></ul>
+<div id="chat-screen" style="display:none;">
+  <div class="sidebar">
+    <h3>الرومز</h3>
+    <ul id="roomList"></ul>
+    <h3>أونلاين</h3>
+    <ul id="onlineUsers"></ul>
+  </div>
 
-  <div class="input-area">
-    <input id="name" placeholder="اسمك" />
-    <input id="msg" placeholder="اكتب رسالة..." />
-    <button id="send">إرسال</button>
+  <div class="chat-area">
+    <h2 id="roomTitle"></h2>
+    <ul id="messages"></ul>
+    <div class="input-area">
+      <input id="msg" placeholder="اكتب رسالة..." />
+      <button id="send">إرسال</button>
+    </div>
   </div>
 </div>
 
