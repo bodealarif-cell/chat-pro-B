@@ -19,9 +19,10 @@ body {
 }
 
 .sidebar {
-  width: 250px;
+  width: 260px;
   background: #1e1f22;
   padding: 10px;
+  overflow-y: auto;
 }
 
 .chat-area {
@@ -35,6 +36,19 @@ body {
   list-style: none;
   padding: 10px;
   overflow-y: auto;
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.message img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-right: 10px;
 }
 
 .input-area {
@@ -58,4 +72,9 @@ button {
   color: white;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.online-dot {
+  color: lime;
+  margin-right: 5px;
 }
