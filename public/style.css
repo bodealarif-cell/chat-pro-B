@@ -1,16 +1,39 @@
 body {
   margin: 0;
-  font-family: Arial;
-  background: #2b2d31;
+  font-family: system-ui;
+  background: #0f0f13;
   color: white;
 }
 
 #login-screen {
+  width: 320px;
+  margin: 120px auto;
   display: flex;
   flex-direction: column;
-  width: 300px;
-  margin: 100px auto;
   gap: 10px;
+}
+
+input {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #1c1c24;
+  color: white;
+  outline: none;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#5865f2,#7c4dff);
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
 }
 
 #chat-screen {
@@ -20,9 +43,8 @@ body {
 
 .sidebar {
   width: 260px;
-  background: #1e1f22;
+  background: #14141a;
   padding: 10px;
-  overflow-y: auto;
 }
 
 .chat-area {
@@ -39,42 +61,20 @@ body {
 }
 
 .message {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.message img {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  margin-right: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #1c1c24;
+  border-radius: 10px;
 }
 
 .input-area {
   display: flex;
   padding: 10px;
-  background: #404249;
-}
-
-input {
-  flex: 1;
-  padding: 8px;
-  margin-right: 5px;
-  border: none;
-  border-radius: 5px;
-}
-
-button {
-  padding: 8px;
-  border: none;
-  background: #5865f2;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+  background: #14141a;
+  gap: 5px;
 }
 
 .online-dot {
-  color: lime;
+  color: #00ff88;
   margin-right: 5px;
 }
