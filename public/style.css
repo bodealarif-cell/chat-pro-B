@@ -1,29 +1,33 @@
 body {
-  font-family: Arial;
-  background: #1e1e2f;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   margin: 0;
+  font-family: Arial;
+  background: #2b2d31;
+  color: white;
 }
 
-.chat-container {
-  background: #2c2c3e;
-  width: 400px;
-  height: 600px;
+#login-screen {
   display: flex;
   flex-direction: column;
-  border-radius: 10px;
-  overflow: hidden;
+  width: 300px;
+  margin: 100px auto;
+  gap: 10px;
 }
 
-h2 {
-  text-align: center;
-  background: #3a3a55;
-  margin: 0;
-  padding: 15px;
-  color: white;
+#chat-screen {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: #1e1f22;
+  padding: 10px;
+}
+
+.chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 #messages {
@@ -31,36 +35,26 @@ h2 {
   list-style: none;
   padding: 10px;
   overflow-y: auto;
-  color: white;
-}
-
-#messages li {
-  margin-bottom: 10px;
-}
-
-.time {
-  font-size: 10px;
-  opacity: 0.6;
 }
 
 .input-area {
   display: flex;
   padding: 10px;
-  background: #3a3a55;
+  background: #404249;
 }
 
 input {
   flex: 1;
   padding: 8px;
   margin-right: 5px;
-  border-radius: 5px;
   border: none;
+  border-radius: 5px;
 }
 
 button {
   padding: 8px;
   border: none;
-  background: #4caf50;
+  background: #5865f2;
   color: white;
   border-radius: 5px;
   cursor: pointer;
