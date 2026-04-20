@@ -10,7 +10,6 @@ app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
 
-// ===== إعدادات =====
 const ACCESS_CODE = "12345";
 const ADMIN_CODE = "99999";
 
@@ -19,26 +18,24 @@ let rooms = {
   "عام": []
 };
 
-let privateMessages = {};
-let friendships = {};
-
 io.on("connection", (socket) => {
 
-  socket.on("login", ({ username, code, avatar }) => {
+  socket.on("login", ({ username, code }) => {
 
     if (code !== ACCESS_CODE && code !== ADMIN_CODE) {
       return socket.emit("login error", "كود غير صحيح");
     }
 
+    if (!username || username.trim() === "") {
+      return socket.emit("login error", "اكتب اسم صحيح");
+    }
+
     users[socket.id] = {
       id: socket.id,
       username,
-      avatar: avatar || "https://i.pravatar.cc/40",
       role: code === ADMIN_CODE ? "admin" : "user",
       room: "عام"
     };
-
-    friendships[socket.id] = [];
 
     socket.join("عام");
 
@@ -50,14 +47,12 @@ io.on("connection", (socket) => {
     updateOnline();
   });
 
-  // ===== إنشاء روم =====
   socket.on("create room", (roomName) => {
     if (!roomName || rooms[roomName]) return;
     rooms[roomName] = [];
     io.emit("room list", Object.keys(rooms));
   });
 
-  // ===== حذف روم (Admin فقط) =====
   socket.on("delete room", (roomName) => {
     const user = users[socket.id];
     if (!user || user.role !== "admin") return;
@@ -67,56 +62,28 @@ io.on("connection", (socket) => {
     io.emit("room list", Object.keys(rooms));
   });
 
-  // ===== تغيير روم =====
   socket.on("change room", (room) => {
     const user = users[socket.id];
-    if (!rooms[room]) return;
+    if (!user || !rooms[room]) return;
 
     socket.leave(user.room);
     user.room = room;
     socket.join(room);
   });
 
-  // ===== رسالة عامة =====
   socket.on("chat message", (msg) => {
     const user = users[socket.id];
     if (!user) return;
 
-    const data = {
+    io.to(user.room).emit("chat message", {
       username: user.username,
-      avatar: user.avatar,
       msg,
       time: new Date().toLocaleTimeString()
-    };
-
-    io.to(user.room).emit("chat message", data);
-  });
-
-  // ===== رسالة خاصة =====
-  socket.on("private message", ({ to, msg }) => {
-
-    if (!privateMessages[to]) privateMessages[to] = [];
-
-    const data = {
-      from: users[socket.id].username,
-      msg,
-      time: new Date().toLocaleTimeString()
-    };
-
-    privateMessages[to].push(data);
-    io.to(to).emit("private message", data);
-  });
-
-  // ===== إضافة صديق =====
-  socket.on("add friend", (friendId) => {
-    if (!friendships[socket.id].includes(friendId)) {
-      friendships[socket.id].push(friendId);
-    }
+    });
   });
 
   socket.on("disconnect", () => {
     delete users[socket.id];
-    delete friendships[socket.id];
     updateOnline();
   });
 
@@ -126,4 +93,6 @@ io.on("connection", (socket) => {
 
 });
 
-server.listen(PORT);
+server.listen(PORT, () => {
+  console.log("Server running");
+});
