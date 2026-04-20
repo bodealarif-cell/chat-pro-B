@@ -1,50 +1,66 @@
 const socket = io();
 
-const nameInput = document.getElementById("name");
-const msgInput = document.getElementById("msg");
-const sendBtn = document.getElementById("send");
-const messages = document.getElementById("messages");
+const loginScreen = document.getElementById("login-screen");
+const chatScreen = document.getElementById("chat-screen");
+const errorText = document.getElementById("error");
 
-let username = "";
+document.getElementById("loginBtn").onclick = () => {
+  const username = document.getElementById("username").value;
+  const code = document.getElementById("code").value;
 
-sendBtn.onclick = sendMessage;
+  socket.emit("login", { username, code });
+};
 
-msgInput.addEventListener("keypress", (e) => {
+socket.on("login error", (msg) => {
+  errorText.textContent = msg;
+});
+
+socket.on("login success", (data) => {
+  loginScreen.style.display = "none";
+  chatScreen.style.display = "flex";
+
+  document.getElementById("roomTitle").textContent = data.room;
+
+  const roomList = document.getElementById("roomList");
+  data.rooms.forEach(room => {
+    const li = document.createElement("li");
+    li.textContent = room;
+    li.onclick = () => socket.emit("change room", room);
+    roomList.appendChild(li);
+  });
+});
+
+socket.on("room changed", (room) => {
+  document.getElementById("roomTitle").textContent = room;
+  document.getElementById("messages").innerHTML = "";
+});
+
+socket.on("online users", (users) => {
+  const list = document.getElementById("onlineUsers");
+  list.innerHTML = "";
+  users.forEach(u => {
+    const li = document.createElement("li");
+    li.textContent = u.username;
+    list.appendChild(li);
+  });
+});
+
+document.getElementById("send").onclick = sendMessage;
+document.getElementById("msg").addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
 
 function sendMessage() {
-
-  if (!username) {
-    username = nameInput.value.trim();
-    if (!username) return alert("اكتب اسمك الأول");
-    nameInput.disabled = true;
-  }
-
+  const msgInput = document.getElementById("msg");
   const msg = msgInput.value.trim();
   if (!msg) return;
 
-  socket.emit("chat message", { name: username, msg });
+  socket.emit("chat message", msg);
   msgInput.value = "";
 }
 
 socket.on("chat message", (data) => {
   const li = document.createElement("li");
-  li.innerHTML = `
-    <strong>${data.name}</strong>: ${data.msg}
-    <div class="time">${data.time}</div>
-  `;
-  messages.appendChild(li);
-  messages.scrollTop = messages.scrollHeight;
-});
-
-socket.on("load messages", (oldMessages) => {
-  oldMessages.forEach(data => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${data.name}</strong>: ${data.msg}
-      <div class="time">${data.time}</div>
-    `;
-    messages.appendChild(li);
-  });
+  li.innerHTML = `<strong>${data.username}</strong>: ${data.msg} <small>${data.time}</small>`;
+  document.getElementById("messages").appendChild(li);
 });
